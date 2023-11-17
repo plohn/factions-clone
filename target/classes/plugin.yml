@@ -1,0 +1,7 @@
+name: WFactions
+version: 1.0
+main: me.plohn.wfactions.WFactions
+commands:
+  f:
+    description: Faction command
+    permission: wfactions.faction

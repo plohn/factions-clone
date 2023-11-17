@@ -1,0 +1,64 @@
+Index: src/main/java/me/plohn/wfactions/factions/listeners/BuildListener.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/main/java/me/plohn/wfactions/factions/listeners/BuildListener.java b/src/main/java/me/plohn/wfactions/factions/listeners/BuildListener.java
+--- a/src/main/java/me/plohn/wfactions/factions/listeners/BuildListener.java	
++++ b/src/main/java/me/plohn/wfactions/factions/listeners/BuildListener.java	(date 1699609326603)
+@@ -2,33 +2,43 @@
+ 
+ import me.plohn.wfactions.factions.Faction;
+ import me.plohn.wfactions.factions.manager.FactionManager;
++import me.plohn.wfactions.logger.Logger;
+ import org.bukkit.Chunk;
++import org.bukkit.Location;
+ import org.bukkit.entity.Player;
+ import org.bukkit.event.EventHandler;
+ import org.bukkit.event.Listener;
+ import org.bukkit.event.block.BlockBreakEvent;
++import org.bukkit.event.block.BlockEvent;
+ import org.bukkit.event.block.BlockPlaceEvent;
+ 
+-import javax.swing.text.html.Option;
+ import java.util.Optional;
+ 
+ public class BuildListener implements Listener {
+     @EventHandler
+     public void onBlockBreak(BlockBreakEvent event){
+-        Player p = event.getPlayer();
+-        Chunk location = event.getBlock().getChunk();
+-
+-        FactionManager.getChunkFaction(location)
+-                .filter(faction -> !faction.getMembers().contains(p))
+-                .ifPresent(faction -> event.setCancelled(true));
++        Player player = event.getPlayer();
++//        if (isAllowedToBuild(event,player)) return;
++//        event.setCancelled(true);
+     }
+     @EventHandler
+     public void onBlockPlace(BlockPlaceEvent event){
+-        Player p = event.getPlayer();
+-        Chunk location = event.getBlock().getChunk();
++        Player player = event.getPlayer();
++        Location loc = new Location();
++        Logger.sendMessage(player,"=============\nCHUNK: "+event.getBlock().getChunk().toString());
++        Logger.sendMessage(player,"CHUNK X: "+String.valueOf(event.getBlock().getChunk().getX()));
++        Logger.sendMessage(player,"CHUNK Y: "+String.valueOf(event.getBlock().getChunk().getZ()));
++        Logger.sendMessage(player,"LOCATION "+event.getBlock().getLocation().toString());
++//        if (isAllowedToBuild(event,player)) return;
++//        event.setCancelled(true);
++    }
++    private boolean isAllowedToBuild(BlockEvent event, Player player){
++        Chunk chunk = event.getBlock().getChunk();
++        Location location = event.getBlock().getLocation();
+ 
+-        FactionManager.getChunkFaction(location)
+-                .filter(faction -> !faction.getMembers().contains(p))
+-                .ifPresent(faction -> event.setCancelled(true));
++        Optional<Faction> result = FactionManager.getFaction(location);
++        if (result.isEmpty()) return true;
++        if (result.get().getMembers().contains(player)) return true;
++        return !location.getChunk().equals(chunk);
+     }
+ }
