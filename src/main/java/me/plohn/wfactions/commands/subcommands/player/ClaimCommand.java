@@ -1,8 +1,11 @@
 package me.plohn.wfactions.commands.subcommands.player;
 
 import me.plohn.wfactions.commands.SubCommand;
+import me.plohn.wfactions.factions.FPlayer;
 import me.plohn.wfactions.factions.Faction;
 import me.plohn.wfactions.factions.manager.FactionManager;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Chunk;
 import org.bukkit.entity.Player;
 
@@ -15,7 +18,7 @@ import java.util.Optional;
 //
 //                        Logger.sendMessage(sender,receiver.getName() + "Declined your invitation");
 //                        Logger.sendMessage(receiver,"Declined "+factionName+"'s invitation");
-public class ClaimCommand extends SubCommand { // /f show
+public class ClaimCommand extends SubCommand { // /team show
     @Override
     public String getName() {
         return "claim";
@@ -23,40 +26,36 @@ public class ClaimCommand extends SubCommand { // /f show
 
     @Override
     public String getDescription() {
-        return "claim for your faction";
+        return "claim for your team";
     }
 
     @Override
     public String getSyntax() {
-        return "/f claim";
+        return "/team claim";
     }
 
     @Override
     public void perform(Player player, String args[]) {
-        //Check if command has correct syntax
-        if (args.length < 1) {
-            player.sendMessage("You need to provide a name!");
-            player.sendMessage(this.getDescription());
-            return;
-        };
         //Check if player has faction
-        Optional<Faction> result = FactionManager.getPlayerFaction(player);
+        Optional<FPlayer> result = FactionManager.getFactionPlayer(player);
         if (result.isEmpty()) {
-            player.sendMessage("You must have a faction to do that.");
+            player.sendMessage(ChatColor.translateAlternateColorCodes('&', "&cYou need a team to do that."));
             return;
         }
-        Faction playerFaction = result.get();
+        FPlayer factionPlayer = result.get();
         //Check if player is the leader of faction
-        if (!playerFaction.isLeader(player)) {
-            player.sendMessage("You must a faction leader to perm this command");
+        if (!factionPlayer.isLeader()) {
+            player.sendMessage(ChatColor.translateAlternateColorCodes('&',"&cYou need to be team leader to perform this command") );
             return;
         }
         /* Try to claim land */
         Chunk location = player.getLocation().getChunk();
-        if (FactionManager.factionAttemptClaim(playerFaction,location)){
-            player.sendMessage("Claimed this chunk");
+        try {
+            FactionManager.factionAttemptClaim(factionPlayer,location);
+            player.sendMessage(ChatColor.translateAlternateColorCodes('&', "&aYou claimed land for your team"));
+        } catch (Exception e) {
+            Bukkit.getLogger().info(e.getMessage());
+            player.sendMessage(ChatColor.translateAlternateColorCodes('&', e.getMessage()));
         }
-        //
-        player.sendMessage("You cannot claim this chunk");
     }
 }

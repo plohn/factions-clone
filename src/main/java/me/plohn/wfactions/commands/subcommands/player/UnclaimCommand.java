@@ -1,8 +1,11 @@
 package me.plohn.wfactions.commands.subcommands.player;
 
 import me.plohn.wfactions.commands.SubCommand;
+import me.plohn.wfactions.factions.FPlayer;
 import me.plohn.wfactions.factions.Faction;
 import me.plohn.wfactions.factions.manager.FactionManager;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Chunk;
 import org.bukkit.entity.Player;
 
@@ -15,7 +18,7 @@ import java.util.Optional;
 //
 //                        Logger.sendMessage(sender,receiver.getName() + "Declined your invitation");
 //                        Logger.sendMessage(receiver,"Declined "+factionName+"'s invitation");
-public class UnclaimCommand extends SubCommand { // /f show
+public class UnclaimCommand extends SubCommand { // /team show
     @Override
     public String getName() {
         return "unclaim";
@@ -28,29 +31,30 @@ public class UnclaimCommand extends SubCommand { // /f show
 
     @Override
     public String getSyntax() {
-        return "/f invite <player>";
+        return "/team invite <player>";
     }
 
     @Override
     public void perform(Player player, String args[]) {
         //Check if player has faction
-        Optional<Faction> result = FactionManager.getPlayerFaction(player);
+        Optional<FPlayer> result = FactionManager.getFactionPlayer(player);
         if (result.isEmpty()) {
-            player.sendMessage("You must have a faction to do that.");
+            player.sendMessage(ChatColor.translateAlternateColorCodes('&',"&cYou must have a team to do that."));
             return;
         }
-        Faction playerFaction = result.get();
+        FPlayer playerFaction = result.get();
         //Check if player is the leader of faction
-        if (!playerFaction.isLeader(player)) {
-            player.sendMessage("You must a faction leader to perm this command");
+        if (!playerFaction.isLeader()) {
+            player.sendMessage(ChatColor.translateAlternateColorCodes('&',"You must be team leader to perform this command"));
             return;
         }
 
-        /* Try to unclaim land */
+        /* Try to un claim land */
         Chunk chunk = player.getLocation().getChunk();
-        if (FactionManager.factionAttemptUnClaim(playerFaction,chunk)){
-            player.sendMessage("Unclaimed chunk");
+        try {
+            FactionManager.factionAttemptUnClaim(playerFaction,chunk);
+        } catch (Exception e) {
+            Bukkit.getLogger().info(e.getMessage());
         }
-        player.sendMessage("You cannot unclaim this chunk");
     }
 }

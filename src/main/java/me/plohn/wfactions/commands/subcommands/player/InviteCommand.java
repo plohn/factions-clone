@@ -1,14 +1,18 @@
 package me.plohn.wfactions.commands.subcommands.player;
 
+import me.plohn.wfactions.factions.FPlayer;
 import me.plohn.wfactions.factions.Faction;
 import me.plohn.wfactions.factions.manager.FactionManager;
 import me.plohn.wfactions.commands.SubCommand;
 import me.plohn.wfactions.invites.Invite;
 import me.plohn.wfactions.invites.manager.InviteManager;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
+import javax.swing.text.html.Option;
 import java.util.Optional;
+
 // Way of sending messages to offline players
 //                Player sender = result.get().getSender();
 //                        Player receiver = result.get().getReceiver();
@@ -16,7 +20,7 @@ import java.util.Optional;
 //
 //                        Logger.sendMessage(sender,receiver.getName() + "Declined your invitation");
 //                        Logger.sendMessage(receiver,"Declined "+factionName+"'s invitation");
-public class InviteCommand extends SubCommand { // /f show
+public class InviteCommand extends SubCommand { // /team show
     @Override
     public String getName() {
         return "invite";
@@ -24,47 +28,48 @@ public class InviteCommand extends SubCommand { // /f show
 
     @Override
     public String getDescription() {
-        return "Invites player to your faction";
+        return "Invites a player to your team";
     }
 
     @Override
     public String getSyntax() {
-        return "/f invite <player>";
+        return "/team invite <player>";
     }
 
     @Override
     public void perform(Player player, String args[]) {
         //Check if command has correct syntax
         if (args.length < 1) {
-            player.sendMessage("You need to provide a name!");
+            player.sendMessage(ChatColor.translateAlternateColorCodes('&', "&cYou need to provide a player."));
             player.sendMessage(this.getDescription());
             return;
-        };
+        }
         //Check if player has faction
-        Optional<Faction> result = FactionManager.getPlayerFaction(player);
-        if (result.isEmpty()) {
-            player.sendMessage("You must have a faction to do that.");
+        Optional<FPlayer> factionPlayer = FactionManager.getFactionPlayer(player);
+        if (factionPlayer.isEmpty()) {
+            player.sendMessage(ChatColor.translateAlternateColorCodes('&', "&cYou must have a team in order to do that."));
             return;
         }
-        Faction playerFaction = result.get();
         //Check if player is the leader of faction
-        if (!playerFaction.isLeader(player)) {
-            player.sendMessage("You must a faction leader to perm this command");
+        if (!factionPlayer.get().isLeader()) {
+            player.sendMessage(ChatColor.translateAlternateColorCodes('&', "&cYou must be a team leader to perform this command"));
             return;
         }
         //Check if player exists
-        if (Bukkit.getPlayer(args[1]) == null) {
-            player.sendMessage("Player not found!");
+        String target = args[1];
+        Optional<Player> player2 = Optional.ofNullable(Bukkit.getPlayer(target));
+        if (player2.isEmpty()) {
+            player.sendMessage(ChatColor.translateAlternateColorCodes('&', "&cPlayer not found!"));
             return;
         }
-        Player receiver = Bukkit.getPlayer(args[1]);
+        Player receiver = player2.get();
         /* Check if there is already an invitation */
-        Invite invitation = new Invite(player,receiver,playerFaction);
-        if (!InviteManager.sentInvitation(invitation)){
-            player.sendMessage("You have already sent an invitation to " + receiver.getName());
+        Invite invitation = new Invite(player, receiver, factionPlayer.get().getFaction());
+        if (!InviteManager.sentInvitation(invitation)) {
+            player.sendMessage(ChatColor.translateAlternateColorCodes('&', "&7You have already sent an invitation to &c&o" + receiver.getName()));
         }
-        player.sendMessage("Sent invitation to "+receiver.getName());
-        receiver.sendMessage(player.getName()+" invited you to "+playerFaction.getName());
-        receiver.sendMessage("type /f join "+playerFaction.getName()+" to join");
+        player.sendMessage(ChatColor.translateAlternateColorCodes('&', "&aSent invitation to &a&o" + receiver.getName()));
+        receiver.sendMessage(ChatColor.translateAlternateColorCodes('&', "&a" + player.getName() + " invited you to " + factionPlayer.get().getFaction().getName()));
+        receiver.sendMessage(ChatColor.translateAlternateColorCodes('&', "&atype /team join " + player.getName() + " to join"));
     }
 }

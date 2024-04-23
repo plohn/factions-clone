@@ -2,6 +2,7 @@ package me.plohn.wfactions.commands.manager;
 
 import me.plohn.wfactions.commands.SubCommand;
 import me.plohn.wfactions.commands.subcommands.player.*;
+import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -22,6 +23,7 @@ public class CommandManager implements CommandExecutor {
         subCommands.add(new InviteCommand());
         subCommands.add(new DeleteInviteCommand());
         subCommands.add(new JoinCommand());
+        subCommands.add(new LeaveCommand());
         subCommands.add(new KickCommand());
         subCommands.add(new DisbandCommand());
         subCommands.add(new ClaimCommand());
@@ -43,10 +45,10 @@ public class CommandManager implements CommandExecutor {
              if (subcommand.isPresent()) {
                  subcommand.get().perform(player,args);
              }else {
-                 player.sendMessage("Command not found");
+                 player.sendMessage(ChatColor.translateAlternateColorCodes('&',"&cCommand not found"));
              }
         }else {
-            player.sendMessage("Please use the correct syndax for factions commands");
+            player.sendMessage(ChatColor.translateAlternateColorCodes('&',"&cPlease use the correct syndax for factions commands"));
         }
         return false;
     }

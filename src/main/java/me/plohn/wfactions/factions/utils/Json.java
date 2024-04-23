@@ -21,7 +21,7 @@ public class Json {
     public static void write(Plugin plugin, String fileName, Object object) {
         Path path = Paths.get(plugin.getDataFolder() + "/" + fileName + ".json");
         try {
-            if(!Files.exists(path)) {
+            if (!Files.exists(path)) {
                 Files.createDirectories(path.getParent());
                 Files.createFile(path);
             }

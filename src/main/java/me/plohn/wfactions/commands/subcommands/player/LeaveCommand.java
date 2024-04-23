@@ -1,9 +1,11 @@
 package me.plohn.wfactions.commands.subcommands.player;
 
 import me.plohn.wfactions.commands.SubCommand;
+import me.plohn.wfactions.factions.FPlayer;
 import me.plohn.wfactions.factions.Faction;
 import me.plohn.wfactions.factions.manager.FactionManager;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
 import javax.swing.text.html.Option;
@@ -17,18 +19,19 @@ public class LeaveCommand extends SubCommand {
 
     @Override
     public String getDescription() {
-        return "Leave your faction";
+        return "Leave your team";
     }
 
     @Override
     public String getSyntax() {
-        return "/f leave";
+        return "/team leave";
     }
 
     @Override
     public void perform(Player player, String[] args) {
-        Optional<Faction> result = FactionManager.getPlayerFaction(player);
-        if (result.isEmpty()) player.sendMessage("You must be in a faction to do that.");
+        Optional<FPlayer> result = FactionManager.getFactionPlayer(player);
+        if (result.isEmpty())
+            player.sendMessage(ChatColor.translateAlternateColorCodes('&', "&cYou must be in a team to do that."));
 
         try {
             FactionManager.playerLeaveFaction(player);
